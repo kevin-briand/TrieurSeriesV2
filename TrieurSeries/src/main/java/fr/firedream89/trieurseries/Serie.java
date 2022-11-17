@@ -43,6 +43,10 @@ public class Serie implements Iterable<File>, Iterator<File> {
         return episodes.size();
     }
 
+    public File get(int episode) {
+        return episodes.get(episode);
+    }
+
     @Override
     public String toString() {
         StringBuffer str = new StringBuffer(name + " - Saison " + season);

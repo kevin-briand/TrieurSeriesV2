@@ -68,6 +68,7 @@ public class TrieurSeries extends Application {
 
         //création racine
         tree.setRoot(new TreeItem<>(path));
+        tree.getRoot().setExpanded(true);
 
         for(File f : directoryList) {
             if(f.isDirectory() || !directoryOnly)
@@ -156,17 +157,36 @@ public class TrieurSeries extends Application {
 
     public void trier() throws IOException {
         if(series != null && currentPath != null) {
+            boolean isOk = true;
+            StringBuffer error = new StringBuffer();
+
             for(Serie serie : series) {
                 String path = currentPath + "/" + serie.getName() + "/Saison " + serie.getSeason();
                 File mkPath = new File(path);
                 mkPath.mkdirs();
                 for(File episode : serie) {
+                    //Move file
                     Path oldPath = Paths.get(episode.getAbsolutePath());
                     Path newPath = Paths.get(path + "/" + episode.getName());
                     Files.move(oldPath,newPath);
+
+                    //Remove NFO
+                    List<File> nfo = Outils.getFilesInDirectory(episode.getAbsolutePath(), new String[]{"nfo"},false);
+                    for(File rm : nfo) {
+                        if(!rm.delete()) {
+                            isOk = false;
+                            error.append(rm.getPath() + " non supprimé\n");
+                        }
+                    }
+
+                    //Remove Dir
+                    File rmPath = new File(episode.getParent());
+                    rmPath.delete();
                 }
             }
-            //remove oldPath
+            if(!isOk) {
+                new Alert(Alert.AlertType.ERROR, error.toString());
+            }
             new Alert(Alert.AlertType.INFORMATION,"Opération terminé !").show();
         }
     }
