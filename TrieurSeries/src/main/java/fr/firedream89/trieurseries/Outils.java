@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class Outils {
 
     /**
-     * retourne la liste des fichiers et dossiers contenu dans le répertoire
+     * retourne la liste des fichiers et dossiers contenue dans le répertoire
      * @param path lien vers le répertoire
      * @return liste de fichiers/dossiers
      */
@@ -18,7 +18,7 @@ public class Outils {
     }
 
     /**
-     * retourne la liste des fichiers et dossiers contenu dans le répertoire
+     * retourne la liste des fichiers et dossiers contenue dans le répertoire
      * @param path lien vers le répertoire
      * @param filter liste de String déterminant le filtrage des fichiers (les dossiers sont exclus du filtrage)
      * @return liste de fichiers/dossiers
@@ -63,6 +63,18 @@ public class Outils {
         return result;
     }
 
+    /**
+     * Permet de trouver et d'extraire le nom et la saison d'un épisode
+     * Support de 1 à 3 chiffres, insensible à la casse<br><br>
+     * Format des modèles :<br>
+     * . = chiffre<br>
+     * ..x..., S..E...<br>
+     * @param nom Nom du fichier
+     * @return String[3] :
+     * 0 : nom de la série
+     * 1 : numéro de la saison
+     * 2 : numéro de l'épisode
+     */
     public static String[] extraireNumEpEtSaison(String nom) {
         nom = nom.toUpperCase().replace(".", " ");
 
@@ -91,6 +103,17 @@ public class Outils {
         return result;
     }
 
+    /**
+     * Permet de trouver et d'extraire le nom et la saison d'un épisode
+     * Support de 1 à 2 chiffres, insensible à la casse<br><br>
+     * Format des modèles :<br>
+     * . = chiffre<br>
+     * ..x, S.., Saison .<br>
+     * @param nom Nom du fichier
+     * @return String[2] :
+     * 0 : nom de la série
+     * 1 : numéro de la saison
+     */
     public static String[] extraireNomEtNumSaison(String nom) {
         nom = nom.toUpperCase().replace("."," ");
 
@@ -128,6 +151,11 @@ public class Outils {
         return result;
     }
 
+    /**
+     * remplace les points par des espaces
+     * @param str chaine à modifier
+     * @return renvoie la chaine modifier
+     */
     public static String pointToSpace(String str) {
         if(str != null) {
             StringBuilder strb = new StringBuilder(str.replace(".", " "));
@@ -137,6 +165,11 @@ public class Outils {
         return str;
     }
 
+    /**
+     * Reformate les mots de la chaine en capitalisant uniquement le premier caractère de chaque mot
+     * @param str chaine à modifier
+     * @return renvoie la chaine modifier
+     */
     public static String capitalizeAllWord(String str) {
         StringBuffer finalStr = new StringBuffer();
         if(str != null && !str.isEmpty()) {
@@ -150,10 +183,21 @@ public class Outils {
         return finalStr.toString();
     }
 
+    /**
+     * Supprime les zéros inutiles en transformant la chaine en int
+     * ex : 01 → 1
+     * @param str chaine à modifier
+     * @return renvoie la chaine sans les zéros inutile
+     */
     public static String removeZero(String str) {
         return String.valueOf(Integer.parseInt(str));
     }
 
+    /**
+     * Retire les tirés à la fin de la chaine de caractères
+     * @param str chaine à modifier
+     * @return renvoie la chaine sans le tiré à la fin
+     */
     public static String removeBadChar(String str) {
         if(str != null && !str.isEmpty()) {
             if (str.contains("-")) {
