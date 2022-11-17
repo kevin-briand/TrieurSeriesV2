@@ -2,6 +2,7 @@ package fr.firedream89.trieurseries;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -63,67 +64,63 @@ public class Outils {
     }
 
     public static String[] extraireNumEpEtSaison(String nom) {
-        String[] tentative = nom.replace(".", " ").split(" ");
-        Pattern patternx = Pattern.compile("[0-9][0-9]x[0-9][0-9]");
-        Pattern patternx2 = Pattern.compile("[0-9]x[0-9][0-9]");
-        Pattern patternse = Pattern.compile("S[0-9][0-9]E[0-9][0-9]");
-        Pattern patternse2 = Pattern.compile("S[0-9][0-9]E[0-9][0-9][0-9]");
-        Pattern patternse3 = Pattern.compile("S[0-9]E[0-9][0-9]");
+        nom = nom.toUpperCase().replace(".", " ");
 
-        String[] result = new String[3];
-        for(String value : tentative) {
-            if(patternx.matcher(value).matches() || patternx2.matcher(value).matches()) {
-                result[1] = value.split("x")[0];
-                result[2] = value.split("x")[1];
-                result[0] = pointToSpace(nom.split(result[1] + "x" + result[2])[0]);
-                break;
-            } else if (patternse.matcher(value).matches() || patternse2.matcher(value).matches()
-                    || patternse3.matcher(value).matches()) {
-                result[1] = value.split("E")[0].split("S")[1];
-                result[2] = value.split("E")[1];
-                result[0] = pointToSpace(nom.split("S" + result[1] + "E" + result[2])[0]);
-                break;
+        Pattern patternx = Pattern.compile("[0-9]{1,2}x[0-9]{1,3}");
+        Matcher mX = patternx.matcher(nom);
+        Pattern patternse = Pattern.compile("S[0-9]{1,2}E[0-9]{1,3}");
+        Matcher mSe = patternse.matcher(nom);
+
+        String[] result = new String[3];//nom, saison, episode
+
+        try {
+            if (mSe.find()) {
+                String subStr = mSe.group();
+                result[2] = subStr.split("E")[1];
+                result[1] = subStr.split("E")[0].split("S")[1];//Saison
+                result[0] = pointToSpace(nom.split(subStr)[0]);//Nom
+            } else if (mX.find()) {
+                String subStr = mX.group();
+                result[2] = subStr.split("X")[1];
+                result[1] = subStr.split("X")[0];
+                result[0] = pointToSpace(nom.split(subStr)[0]);
             }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
         return result;
     }
 
     public static String[] extraireNomEtNumSaison(String nom) {
-        ArrayList<String> tentative = new ArrayList<>(Stream.of(nom.toUpperCase().replace(".", " ").split(" ")).toList());
-        //Saison seulement dossier
-        Pattern patterns = Pattern.compile("Saison");
-        Pattern patterns2 = Pattern.compile("S[0-9][0-9]");
-        Pattern patterns3 = Pattern.compile("S[0-9]");
-        //Saison et épisode pour les fichiers
-        Pattern patternx = Pattern.compile("[0-9][0-9]X[0-9][0-9]");
-        Pattern patternx2 = Pattern.compile("[0-9]X[0-9][0-9]");
-        Pattern patternse = Pattern.compile("S[0-9][0-9]E[0-9][0-9]");
-        Pattern patternse2 = Pattern.compile("S[0-9][0-9]E[0-9][0-9][0-9]");
-        Pattern patternse3 = Pattern.compile("S[0-9]E[0-9][0-9]");
+        nom = nom.toUpperCase().replace("."," ");
+
+        Pattern patterns = Pattern.compile("Saison [0-9]");
+        Matcher mS = patterns.matcher(nom);
+        Pattern patterns2 = Pattern.compile("S[0-9]{1,2}");
+        Matcher mS2 = patterns2.matcher(nom);
+        Pattern patternx = Pattern.compile("[0-9]{1,2}X[0-9]{1,3}");
+        Matcher mX = patternx.matcher(nom);
 
         String[] result = new String[2];
-        for(String value : tentative) {
-            if (patterns2.matcher(value).matches()
-                    || patterns3.matcher(value).matches()) {
-                result[1] = value.split("S")[1];
-                result[0] = pointToSpace(nom.toUpperCase().split("S" + result[1])[0]);
-                break;
-            } else if (patterns.matcher(value).matches()) {
-                result[1] = String.valueOf(tentative.indexOf(value)+1);
-                result[0] = pointToSpace(nom.toUpperCase().split("Saison")[0]);
-                break;
-            } else if (patternx.matcher(value).matches() || patternx2.matcher(value).matches()) {;
-                result[1] = value.split("X")[0];
-                String num = value.split("X")[1];
-                result[0] = pointToSpace(nom.toUpperCase().split(result[1] + "X" + num)[0]);
-                break;
-            } else if (patternse.matcher(value).matches() || patternse2.matcher(value).matches() || patternse3.matcher(value).matches()) {
-                result[1] = value.split("E")[0].split("S")[1];
-                String num = value.split("E")[1];
-                result[0] = pointToSpace(nom.toUpperCase().split("S" + result[1] + "E" + num)[0]);
-                break;
+
+        try {
+            if (mS.find()) {
+                String subStr = mS.group();
+                result[1] = subStr.split(" ")[subStr.split(" ").length - 1];//Saison
+                result[0] = pointToSpace(nom.split(subStr)[0]);//Nom
+            } else if (mX.find()) {
+                String subStr = mX.group();
+                result[1] = subStr.split("X")[0];
+                result[0] = pointToSpace(nom.split(subStr)[0]);
+            } else if (mS2.find()) {
+                String subStr = mS2.group();
+                result[1] = subStr.split("S")[1];
+                result[0] = pointToSpace(nom.split(subStr)[0]);
             }
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
+
         if(result[0] != null) {
             result[0] = capitalizeAllWord(removeBadChar(result[0]));
             result[1] = removeZero(result[1]);
